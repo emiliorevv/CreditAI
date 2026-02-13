@@ -5,8 +5,9 @@ export class CardController {
     static async getCards(req: Request, res: Response) {
         try {
             // In a real app, userId comes from Auth middleware
-            // For now, we might expect it in headers or query for testing
-            const userId = req.headers['x-user-id'] as string; // Temporary
+            // For now, handling potential array if multiple headers sent
+            const userIdHeader = req.headers['x-user-id'];
+            const userId = Array.isArray(userIdHeader) ? userIdHeader[0] : userIdHeader;
 
             if (!userId) {
                 return res.status(400).json({ error: 'User ID required' });
