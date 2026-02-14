@@ -14,31 +14,44 @@ class CardService {
         // Transform data with calculated fields
         return data.map(card => this.calculateCardStatus(card));
     }
+    static async getCardModels() {
+        const { data, error } = await supabase_1.supabase
+            .from('card_models')
+            .select('*');
+        if (error)
+            throw new Error(error.message);
+        return data;
+    }
+    static async createCard(userId, cardData) {
+        const { data, error } = await supabase_1.supabase
+            .from('user_cards')
+            .insert({
+            user_id: userId,
+            model_id: cardData.model_id,
+            credit_limit: cardData.credit_limit,
+            closing_day: cardData.closing_day,
+            due_day: cardData.due_day,
+            current_balance: 0 // Default starting balance
+        })
+            .select()
+            .single();
+        if (error)
+            throw new Error(error.message);
+        return data;
+    }
     static calculateCardStatus(card) {
         const today = new Date();
         const closingDay = card.closing_day;
         const dueDay = card.due_day;
-        // 1. Calculate Next Closing Date
-        // Set the day of the month to the Card's closing day
         let nextClosingDate = (0, date_fns_1.setDate)(today, closingDay);
-        // If that date has already passed this month (and it's not today), 
-        // it means the next closing date is next month.
         if ((0, date_fns_1.isPast)(nextClosingDate) && !this.isToday(nextClosingDate)) {
             nextClosingDate = (0, date_fns_1.addMonths)(nextClosingDate, 1);
         }
-        // 2. Calculate Next Payment Due Date
-        // Usually payment due date is in the month FOLLOWING the closing date
-        // If dueDay < closingDay, it's definitely next month relative to closing date
-        // (e.g. Closes 15th, Due 5th of next month)
         let nextDueDate = (0, date_fns_1.setDate)(nextClosingDate, dueDay);
         if (nextDueDate < nextClosingDate) {
-            // If the due date calculation resulted in a date BEFORE the closing date,
-            // it must be the following month.
             nextDueDate = (0, date_fns_1.addMonths)(nextDueDate, 1);
         }
-        // 3. Days Remaining (to closing date)
         const daysRemaining = (0, date_fns_1.differenceInDays)(nextClosingDate, today);
-        // 4. Utilization & Health
         const utilization = card.current_balance / card.credit_limit;
         let health = 'Good';
         if (utilization > 0.3)

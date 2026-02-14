@@ -18,8 +18,11 @@ export interface ICardModel {
 export interface IUserCard {
     id: string;
     user_id: string;
-    model_id: string;
+    model_id?: string | null;
     card_model?: ICardModel;
+    name_override?: string;
+    issuer_override?: string;
+    card_network?: string;
     current_balance: number;
     credit_limit: number;
     closing_day: number;
@@ -27,6 +30,8 @@ export interface IUserCard {
 }
 export interface ICardStatus extends IUserCard {
     days_remaining: number;
+    days_until_due: number;
+    payment_status: 'PAID' | 'DUE' | 'OVERDUE' | 'SPENDING';
     next_closing_date: string;
     next_payment_due_date: string;
     utilization_ratio: number;
