@@ -33,6 +33,8 @@ export class CardService {
         name_override: cardData.name_override,
         issuer_override: cardData.issuer_override,
         card_network: cardData.card_network,
+        custom_benefits: cardData.custom_benefits,
+        rewards_type_override: cardData.rewards_type_override,
         credit_limit: cardData.credit_limit,
         closing_day: cardData.closing_day,
         due_day: cardData.due_day,

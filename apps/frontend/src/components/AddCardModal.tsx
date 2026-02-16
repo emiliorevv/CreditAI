@@ -8,15 +8,18 @@ import type { ICardModel } from '@credit-ai/shared';
 interface AddCardModalProps {
     isOpen: boolean;
     onClose: () => void;
+    onCardAdded?: () => void;
 }
 
-export function AddCardModal({ isOpen, onClose }: AddCardModalProps) {
+export function AddCardModal({ isOpen, onClose, onCardAdded }: AddCardModalProps) {
     const queryClient = useQueryClient();
     const [mode, setMode] = useState<'select' | 'custom'>('select');
 
     const [selectedModel, setSelectedModel] = useState<ICardModel | null>(null);
     const [customName, setCustomName] = useState('');
     const [customIssuer, setCustomIssuer] = useState('');
+    const [rewardsType, setRewardsType] = useState<'points' | 'cashback'>('points');
+    const [customBenefits, setCustomBenefits] = useState<{ category: string, value: number }[]>([{ category: '', value: 0 }]);
 
     const [creditLimit, setCreditLimit] = useState(1000);
     const [closingDay, setClosingDay] = useState(1);
@@ -31,17 +34,29 @@ export function AddCardModal({ isOpen, onClose }: AddCardModalProps) {
         mutationFn: api.createCard,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['cards'] });
+            if (onCardAdded) onCardAdded();
             onClose();
             // Reset form
             setSelectedModel(null);
             setCustomName('');
             setCustomIssuer('');
+            setRewardsType('points');
+            setCustomBenefits([{ category: '', value: 0 }]);
             setCreditLimit(1000);
             setMode('select');
         }
     });
 
     if (!isOpen) return null;
+
+    const addBenefitRow = () => setCustomBenefits([...customBenefits, { category: '', value: 0 }]);
+    const removeBenefit = (idx: number) => setCustomBenefits(customBenefits.filter((_, i) => i !== idx));
+    const updateBenefit = (idx: number, field: 'category' | 'value', val: any) => {
+        const newBenefits = [...customBenefits];
+        // @ts-ignore
+        newBenefits[idx][field] = val;
+        setCustomBenefits(newBenefits);
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -60,6 +75,14 @@ export function AddCardModal({ isOpen, onClose }: AddCardModalProps) {
             payload.model_id = null;
             payload.name_override = customName;
             payload.issuer_override = customIssuer;
+            payload.rewards_type_override = rewardsType;
+
+            // Convert array to object map
+            const benefitsMap = customBenefits.reduce((acc, curr) => {
+                if (curr.category) acc[curr.category] = curr.value;
+                return acc;
+            }, {} as Record<string, number>);
+            payload.custom_benefits = benefitsMap;
         }
 
         createCardMutation.mutate(payload);
@@ -140,26 +163,90 @@ export function AddCardModal({ isOpen, onClose }: AddCardModalProps) {
                                 </div>
                             )
                         ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <label className="text-xs text-muted">Card Name</label>
-                                    <input
-                                        type="text"
-                                        placeholder="e.g. Gold Rewards"
-                                        className="w-full bg-background border border-white/10 rounded-lg p-3 text-white focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                                        value={customName}
-                                        onChange={(e) => setCustomName(e.target.value)}
-                                    />
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-xs text-muted">Card Name</label>
+                                        <input
+                                            type="text"
+                                            placeholder="e.g. Gold Rewards"
+                                            className="w-full bg-background border border-white/10 rounded-lg p-3 text-white focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                                            value={customName}
+                                            onChange={(e) => setCustomName(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs text-muted">Issuer (Bank)</label>
+                                        <input
+                                            type="text"
+                                            placeholder="e.g. Chase"
+                                            className="w-full bg-background border border-white/10 rounded-lg p-3 text-white focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                                            value={customIssuer}
+                                            onChange={(e) => setCustomIssuer(e.target.value)}
+                                        />
+                                    </div>
                                 </div>
+
+                                {/* Rewards Type Configuration */}
                                 <div className="space-y-2">
-                                    <label className="text-xs text-muted">Issuer (Bank)</label>
-                                    <input
-                                        type="text"
-                                        placeholder="e.g. Chase"
-                                        className="w-full bg-background border border-white/10 rounded-lg p-3 text-white focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                                        value={customIssuer}
-                                        onChange={(e) => setCustomIssuer(e.target.value)}
-                                    />
+                                    <label className="text-xs text-muted">Rewards Type</label>
+                                    <div className="flex gap-2">
+                                        {(['points', 'cashback'] as const).map(type => (
+                                            <button
+                                                key={type}
+                                                type="button"
+                                                onClick={() => setRewardsType(type)}
+                                                className={cn(
+                                                    "px-4 py-2 rounded-lg text-sm border transition-all capitalize",
+                                                    rewardsType === type
+                                                        ? "bg-primary/20 border-primary text-primary"
+                                                        : "bg-white/5 border-white/10 text-muted hover:bg-white/10"
+                                                )}
+                                            >
+                                                {type}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Custom Benefits Input */}
+                                <div className="space-y-2">
+                                    <label className="text-xs text-muted flex justify-between">
+                                        Benefits <span className="text-muted/60">(e.g. Dining: 4x)</span>
+                                    </label>
+                                    <div className="space-y-2">
+                                        {customBenefits.map((benefit, idx) => (
+                                            <div key={idx} className="flex gap-2">
+                                                <input
+                                                    placeholder="Category"
+                                                    className="flex-1 bg-background border border-white/10 rounded-lg p-2 text-sm text-white"
+                                                    value={benefit.category}
+                                                    onChange={(e) => updateBenefit(idx, 'category', e.target.value)}
+                                                />
+                                                <input
+                                                    type="number"
+                                                    placeholder="Val"
+                                                    className="w-20 bg-background border border-white/10 rounded-lg p-2 text-sm text-white"
+                                                    value={benefit.value || ''}
+                                                    onChange={(e) => updateBenefit(idx, 'value', Number(e.target.value))}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeBenefit(idx)}
+                                                    className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                        <button
+                                            type="button"
+                                            onClick={addBenefitRow}
+                                            className="text-xs text-primary hover:underline flex items-center gap-1"
+                                        >
+                                            + Add Benefit
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         )}

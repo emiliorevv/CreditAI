@@ -23,6 +23,8 @@ export interface IUserCard {
     name_override?: string;
     issuer_override?: string;
     card_network?: string;
+    custom_benefits?: ICardBenefits;
+    rewards_type_override?: 'points' | 'cashback';
     current_balance: number;
     credit_limit: number;
     closing_day: number;
@@ -36,4 +38,13 @@ export interface ICardStatus extends IUserCard {
     next_payment_due_date: string;
     utilization_ratio: number;
     health_status: 'Good' | 'Warning' | 'Critical';
+}
+export interface ITransaction {
+    id: string;
+    card_id: string;
+    amount: number;
+    description: string;
+    category: string;
+    date: string;
+    created_at: string;
 }

@@ -28,6 +28,8 @@ export interface IUserCard {
     name_override?: string;
     issuer_override?: string;
     card_network?: string;
+    custom_benefits?: ICardBenefits; // Re-use the existing interface
+    rewards_type_override?: 'points' | 'cashback';
 
     current_balance: number;
     credit_limit: number;
@@ -46,4 +48,14 @@ export interface ICardStatus extends IUserCard {
     next_payment_due_date: string; // ISO Date
     utilization_ratio: number; // 0-1
     health_status: 'Good' | 'Warning' | 'Critical';
+}
+
+export interface ITransaction {
+    id: string;
+    card_id: string;
+    amount: number;
+    description: string;
+    category: string;
+    date: string;
+    created_at: string;
 }
