@@ -1,8 +1,10 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 
 
 import cardRoutes from './routes/card.routes';
+import aiRoutes from './routes/ai.routes';
 import { CardService } from './services/CardService';
 import { TransactionService } from './services/TransactionService';
 
@@ -13,6 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api/cards', cardRoutes);
+app.use('/api', aiRoutes);
 
 app.get('/', (req, res) => {
     res.send('CreditAI Backend is running!');
