@@ -5,6 +5,7 @@ import { CreditCard } from './CreditCard';
 import { AddCardModal } from './AddCardModal';
 import { AddTransactionModal } from './AddTransactionModal';
 import { PlusCircle, Loader2, ArrowUpRight } from 'lucide-react';
+import { AiAssistant } from './AiAssistant';
 
 export function Dashboard() {
     const [isAddCardModalOpen, setIsAddCardModalOpen] = useState(false);
@@ -107,6 +108,7 @@ export function Dashboard() {
                         refetch(); // Refresh card list (balances will update)
                     }}
                 />
+                <AiAssistant />
             </div>
         </main>
     );
