@@ -16,13 +16,16 @@ export class TransactionService {
         return data as ITransaction[];
     }
 
-    static async createTransaction(transactionData: Partial<ITransaction>): Promise<ITransaction> {
+    static async createTransaction(userId: string, transactionData: Partial<ITransaction>): Promise<ITransaction> {
         // 1. Fetch current card details
         const { data: card, error: cardError } = await supabase
             .from('user_cards')
             .select('current_balance, credit_limit')
             .eq('id', transactionData.card_id)
             .single();
+
+        if (cardError) console.error('Supabase card fetch error:', cardError);
+        if (!card) console.error('Card not found for ID:', transactionData.card_id, 'User:', userId);
 
         if (cardError || !card) {
             console.error('Error fetching card for validation:', cardError);
@@ -38,7 +41,7 @@ export class TransactionService {
         // 3. Insert Transaction
         const { data, error } = await supabase
             .from('transactions')
-            .insert(transactionData)
+            .insert({ ...transactionData, user_id: userId })
             .select()
             .single();
 
