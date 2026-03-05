@@ -2,7 +2,23 @@ import { supabase } from '../config/supabase';
 import { ITransaction } from '@credit-ai/shared';
 
 export class TransactionService {
-    static async getTransactions(cardId: string): Promise<ITransaction[]> {
+    static async getTransactions(userId: string, cardId: string): Promise<ITransaction[]> {
+        // 1. Verify card ownership
+        const { data: card, error: cardError } = await supabase
+            .from('user_cards')
+            .select('user_id')
+            .eq('id', cardId)
+            .single();
+
+        if (cardError || !card) {
+            console.error('Error fetching card for validation:', { cardError, cardId, userId });
+            throw new Error('Card not found');
+        }
+
+        if (card.user_id !== userId) {
+            throw new Error('Forbidden: Card does not belong to user');
+        }
+
         const { data, error } = await supabase
             .from('transactions')
             .select('*')
@@ -24,11 +40,8 @@ export class TransactionService {
             .eq('id', transactionData.card_id)
             .single();
 
-        if (cardError) console.error('Supabase card fetch error:', cardError);
-        if (!card) console.error('Card not found for ID:', transactionData.card_id, 'User:', userId);
-
         if (cardError || !card) {
-            console.error('Error fetching card for validation:', cardError);
+            console.error('Error fetching card for validation:', { cardError, cardId: transactionData.card_id, userId });
             throw new Error('Card not found for transaction validation');
         }
 

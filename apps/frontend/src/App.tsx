@@ -3,6 +3,7 @@ import { Dashboard } from './components/Dashboard';
 import { LoginPage } from './pages/Login';
 import { RegisterPage } from './pages/Register';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { Toaster } from 'react-hot-toast';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuth();
@@ -40,6 +41,7 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <AppContent />
+        <Toaster position="top-right" />
       </AuthProvider>
     </BrowserRouter>
   );

@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { supabase } from '../config/supabase';
+import type { User } from '@supabase/supabase-js';
 
 export interface AuthRequest extends Request {
-    user?: any;
+    user?: User;
 }
 
 export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -12,7 +13,11 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
         return res.status(401).json({ error: 'Missing Authorization header' });
     }
 
-    console.log('[AuthMiddleware] Heading:', authHeader);
+    if (!authHeader.startsWith('Bearer ')) {
+        console.error('[AuthMiddleware] Invalid header format');
+        return res.status(401).json({ error: 'Invalid Authorization header format' });
+    }
+
     const token = authHeader.split(' ')[1];
 
     if (!token) {

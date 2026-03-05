@@ -37,7 +37,6 @@ export function LoginPage() {
                     </h2>
                 </div>
                 <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-                    <input type="hidden" name="remember" value="true" />
                     <div className="-space-y-px rounded-md shadow-sm">
                         <div>
                             <label htmlFor="email-address" className="sr-only">

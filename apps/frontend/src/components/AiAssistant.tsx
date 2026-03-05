@@ -45,14 +45,13 @@ export function AiAssistant() {
     return (
         <>
             {/* Floating FAB */}
-            < button
-                onClick={() => setIsOpen(true)
-                }
+            <button
+                onClick={() => setIsOpen(true)}
                 className={`fixed bottom-6 right-6 p-4 rounded-full shadow-2xl transition-all duration-300 z-50 ${isOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100 bg-white hover:bg-neutral-100 hover:scale-110'
                     }`}
             >
                 <Sparkles className="w-6 h-6 text-indigo-600" />
-            </button >
+            </button>
 
             {/* Chat Window */}
             {

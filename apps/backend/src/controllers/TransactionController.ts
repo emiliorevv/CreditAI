@@ -13,15 +13,12 @@ export class TransactionController {
             if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
             const { cardId } = req.params;
-            // Verify card belongs to user? 
-            // TransactionService.getTransactions just selects by card_id.
-            // RLS will handle security if we use RLS. 
-            // But if we use service role or if we want app-level check:
-            // Service should probably accept userId to verify ownership or we trust RLS.
-            // Let's pass userId to service just in case we want to enforce it there too.
-            const transactions = await TransactionService.getTransactions(cardId);
+            const transactions = await TransactionService.getTransactions(userId, cardId);
             res.json(transactions);
         } catch (error: any) {
+            if (error.message === 'Forbidden: Card does not belong to user') {
+                return res.status(403).json({ error: error.message });
+            }
             res.status(500).json({ error: error.message });
         }
     }
@@ -32,7 +29,10 @@ export class TransactionController {
             if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
             const transaction = await TransactionService.createTransaction(userId, req.body);
-            res.json(transaction);
+            if (transaction && transaction.id) {
+                res.location(`/api/transactions/${transaction.id}`);
+            }
+            res.status(201).json(transaction);
         } catch (error: any) {
             console.error('Error creating transaction:', error);
             res.status(500).json({ error: error.message });

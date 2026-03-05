@@ -8,8 +8,7 @@ import cors from 'cors';
 
 import cardRoutes from './routes/card.routes';
 import aiRoutes from './routes/ai.routes';
-import { CardService } from './services/CardService';
-import { TransactionService } from './services/TransactionService';
+import transactionRoutes from './routes/transaction.routes';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -17,7 +16,7 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-import transactionRoutes from './routes/transaction.routes';
+
 
 app.use('/api/cards', cardRoutes);
 app.use('/api/transactions', transactionRoutes);

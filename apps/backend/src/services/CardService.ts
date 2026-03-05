@@ -15,6 +15,20 @@ export class CardService {
     return (data as IUserCard[]).map(card => this.calculateCardStatus(card));
   }
 
+  static async getCardById(cardId: string): Promise<IUserCard | null> {
+    const { data, error } = await supabase
+      .from('user_cards')
+      .select('*')
+      .eq('id', cardId)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') return null; // No rows found
+      throw new Error(error.message);
+    }
+    return data as IUserCard;
+  }
+
   static async getCardModels(): Promise<ICardModel[]> {
     const { data, error } = await supabase
       .from('card_models')

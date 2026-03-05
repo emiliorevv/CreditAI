@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
 import { CardService } from '../services/CardService';
 import { TransactionService } from '../services/TransactionService';
+import { AuthRequest } from '../middleware/authMiddleware';
 
 export class CardController {
 
     private static getUserId(req: Request): string | null {
-        // @ts-ignore
-        return req.user?.id || null;
+        return (req as AuthRequest).user?.id || null;
     }
 
     static async getCards(req: Request, res: Response) {
@@ -47,12 +47,18 @@ export class CardController {
             const userId = CardController.getUserId(req);
             if (!userId) return res.status(400).json({ error: 'User ID required' });
 
-            // Optionally verify card ownership here if not implicitly handled by RLS/Service
-            // For now, simple fetch
             const { cardId } = req.params;
-            // TODO: Verify card exists and belongs to user
 
-            const transactions = await TransactionService.getTransactions(cardId);
+            // Verify card exists and belongs to user
+            const card = await CardService.getCardById(cardId);
+            if (!card) {
+                return res.status(404).json({ error: 'Card not found' });
+            }
+            if (card.user_id !== userId) {
+                return res.status(403).json({ error: 'Forbidden: Card does not belong to user' });
+            }
+
+            const transactions = await TransactionService.getTransactions(userId, cardId);
             res.json(transactions);
         } catch (error: any) {
             res.status(500).json({ error: error.message });
