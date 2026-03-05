@@ -1,13 +1,23 @@
 import { Router } from 'express';
 import { AiService } from '../services/AiService';
+import { authMiddleware, AuthRequest } from '../middleware/authMiddleware';
 
 const router = Router();
 
-router.post('/chat', async (req, res) => {
+router.post('/chat', authMiddleware, async (req: AuthRequest, res) => {
+    console.log('[AI Route] Received chat request');
+    console.log('[AI Route] Headers:', req.headers);
+    console.log('[AI Route] Body:', JSON.stringify(req.body, null, 2));
+
     try {
         const { messages, text } = req.body;
-        // Hardcoded user ID for now, similar to other parts of the app
-        const userId = '150c30ea-57a8-4142-bfb9-7a29b9dd07e2';
+        const userId = req.user?.id;
+        console.log('[AI Route] User ID:', userId);
+
+        if (!userId) {
+            console.error('[AI Route] Unauthorized: No user ID');
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
 
         // Extract last message content. Frontend sends 'parts', curl might send 'content' or 'text'.
         const lastMsg = messages?.[messages.length - 1];

@@ -2,7 +2,23 @@ import { supabase } from '../config/supabase';
 import { ITransaction } from '@credit-ai/shared';
 
 export class TransactionService {
-    static async getTransactions(cardId: string): Promise<ITransaction[]> {
+    static async getTransactions(userId: string, cardId: string): Promise<ITransaction[]> {
+        // 1. Verify card ownership
+        const { data: card, error: cardError } = await supabase
+            .from('user_cards')
+            .select('user_id')
+            .eq('id', cardId)
+            .single();
+
+        if (cardError || !card) {
+            console.error('Error fetching card for validation:', { cardError, cardId, userId });
+            throw new Error('Card not found');
+        }
+
+        if (card.user_id !== userId) {
+            throw new Error('Forbidden: Card does not belong to user');
+        }
+
         const { data, error } = await supabase
             .from('transactions')
             .select('*')
@@ -16,7 +32,7 @@ export class TransactionService {
         return data as ITransaction[];
     }
 
-    static async createTransaction(transactionData: Partial<ITransaction>): Promise<ITransaction> {
+    static async createTransaction(userId: string, transactionData: Partial<ITransaction>): Promise<ITransaction> {
         // 1. Fetch current card details
         const { data: card, error: cardError } = await supabase
             .from('user_cards')
@@ -25,7 +41,7 @@ export class TransactionService {
             .single();
 
         if (cardError || !card) {
-            console.error('Error fetching card for validation:', cardError);
+            console.error('Error fetching card for validation:', { cardError, cardId: transactionData.card_id, userId });
             throw new Error('Card not found for transaction validation');
         }
 
@@ -38,7 +54,7 @@ export class TransactionService {
         // 3. Insert Transaction
         const { data, error } = await supabase
             .from('transactions')
-            .insert(transactionData)
+            .insert({ ...transactionData, user_id: userId })
             .select()
             .single();
 
