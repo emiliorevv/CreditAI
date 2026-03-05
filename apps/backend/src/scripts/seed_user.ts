@@ -3,10 +3,10 @@ import dotenv from 'dotenv';
 import path from 'path';
 
 // Load env from parent directory
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+dotenv.config({ path: path.resolve(__dirname, '../../../../.env') });
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_KEY; // Ideally Service Role Key, but anon for now if policies allow insert
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY; // Ideally Service Role Key, but anon for now if policies allow insert
 
 if (!supabaseUrl || !supabaseKey) {
     console.error('Missing Supabase URL or Key');
