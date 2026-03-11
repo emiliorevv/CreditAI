@@ -36,13 +36,18 @@ export class TransactionService {
         // 1. Fetch current card details
         const { data: card, error: cardError } = await supabase
             .from('user_cards')
-            .select('current_balance, credit_limit')
+            .select('user_id, current_balance, credit_limit')
             .eq('id', transactionData.card_id)
             .single();
 
         if (cardError || !card) {
             console.error('Error fetching card for validation:', { cardError, cardId: transactionData.card_id, userId });
             throw new Error('Card not found for transaction validation');
+        }
+
+        if (card.user_id !== userId) {
+            console.error('Forbidden: User attempted to create transaction on unauthorized card', { userId, cardId: transactionData.card_id });
+            throw new Error('Forbidden: Card does not belong to user');
         }
 
         // 2. Validate Limit
@@ -52,9 +57,18 @@ export class TransactionService {
         }
 
         // 3. Insert Transaction
+        const sanitizedPayload = {
+            card_id: transactionData.card_id,
+            amount: transactionData.amount,
+            date: transactionData.date,
+            description: transactionData.description,
+            category: transactionData.category,
+            user_id: userId
+        };
+
         const { data, error } = await supabase
             .from('transactions')
-            .insert({ ...transactionData, user_id: userId })
+            .insert(sanitizedPayload)
             .select()
             .single();
 

@@ -14,9 +14,11 @@ export function AiAssistant() {
     const { messages, status, sendMessage } = useChat({
         transport: new DefaultChatTransport({
             api: '/api/chat',
-            headers: {
-                'Authorization': `Bearer ${session?.access_token || ''}`
-            }
+            ...(session?.access_token ? {
+                headers: {
+                    'Authorization': `Bearer ${session.access_token}`
+                }
+            } : {})
         }),
         onError: (error: Error) => {
             console.error('Chat Error:', error);
@@ -82,7 +84,6 @@ export function AiAssistant() {
                             )}
 
                             {messages.map((m: any) => {
-                                console.log('Rendering message:', m); // Debug log
                                 return (
                                     <div
                                         key={m.id}

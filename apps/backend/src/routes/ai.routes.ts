@@ -6,8 +6,9 @@ const router = Router();
 
 router.post('/chat', authMiddleware, async (req: AuthRequest, res) => {
     console.log('[AI Route] Received chat request');
-    console.log('[AI Route] Headers:', req.headers);
-    console.log('[AI Route] Body:', JSON.stringify(req.body, null, 2));
+    if (process.env.NODE_ENV === 'development' || process.env.DEBUG) {
+        console.debug(`[AI Route] Body length: ${req.body ? JSON.stringify(req.body).length : 0} chars`);
+    }
 
     try {
         const { messages, text } = req.body;
@@ -51,16 +52,27 @@ router.post('/chat', authMiddleware, async (req: AuthRequest, res) => {
 
         res.write(`data: ${JSON.stringify({ type: 'text-start', id: genId })}\n\n`);
 
+        let clientConnected = true;
+        req.on('close', () => {
+            if (process.env.NODE_ENV === 'development' || process.env.DEBUG) {
+                console.log('[AI Route] Client disconnected prematurely.');
+            }
+            clientConnected = false;
+        });
+
         for await (const part of result.fullStream) {
+            if (!clientConnected || res.writableEnded) break;
+
             if (part.type === 'text-delta') {
                 res.write(`data: ${JSON.stringify({ type: 'text-delta', id: genId, delta: part.text })}\n\n`);
             }
         }
 
-        res.write(`data: ${JSON.stringify({ type: 'text-end', id: genId })}\n\n`);
-        res.write(`data: ${JSON.stringify({ type: 'finish', finishReason: 'stop' })}\n\n`);
-
-        res.end();
+        if (clientConnected && !res.writableEnded) {
+            res.write(`data: ${JSON.stringify({ type: 'text-end', id: genId })}\n\n`);
+            res.write(`data: ${JSON.stringify({ type: 'finish', finishReason: 'stop' })}\n\n`);
+            res.end();
+        }
     } catch (error: any) {
         console.error('AI Service Error:', error);
         res.status(500).json({ error: error.message });

@@ -60,12 +60,13 @@ export const api = {
         if (!response.ok) {
             const errorText = await response.text();
             console.error('API Error Response:', errorText);
+            let errorJson;
             try {
-                const errorJson = JSON.parse(errorText);
-                throw new Error(errorJson.error || 'Failed to create transaction');
+                errorJson = JSON.parse(errorText);
             } catch (e) {
                 throw new Error(`Failed to create transaction: ${response.status} ${response.statusText}`);
             }
+            throw new Error(errorJson.error || 'Failed to create transaction');
         }
         return response.json();
     }

@@ -5,21 +5,24 @@ import { supabase } from '../config/supabase';
 
 export class AiService {
    static async generateResponse(userMessage: string, userId: string): Promise<any> {
+      if (!process.env.OPENAI_API_KEY) {
+         throw new Error('[AiService] CRITICAL: OPENAI_API_KEY is missing');
+      }
+
       // 1. Fetch Rich Context via CardService (includes utilization, due dates, health)
       const cards = await CardService.getUserCards(userId);
 
-      console.log(`[AiService] User ${userId} has ${cards.length} cards.`);
-      if (!process.env.OPENAI_API_KEY) {
-         console.error('[AiService] CRITICAL: OPENAI_API_KEY is missing!');
-      }
+      const maskedId = userId ? `${userId.substring(0, 4)}...` : 'unknown';
+      console.log(`[AiService] User ${maskedId} has ${cards.length} cards.`);
 
       // 2. Construct System Prompt with Financial & Rewards Logic
+      const redactedCards = cards.map(({ user_id, ...rest }) => rest);
       const systemPrompt = `
 You are an expert credit card financial assistant. 
 Your goal is to help the user maximize their rewards (cashback/points) AND protect their credit health.
 
 User's Portfolio:
-${JSON.stringify(cards, null, 2)}
+${JSON.stringify(redactedCards, null, 2)}
 
 CORE RULES:
 

@@ -10,7 +10,7 @@ WHERE t.card_id = c.id
 AND t.user_id IS NULL;
 
 -- Make user_id NOT NULL after backfill (optional, might fail if there are orphaned transactions)
--- ALTER TABLE public.transactions ALTER COLUMN user_id SET NOT NULL;
+ALTER TABLE public.transactions ALTER COLUMN user_id SET NOT NULL;
 
 -- Enable RLS
 ALTER TABLE public.transactions ENABLE ROW LEVEL SECURITY;

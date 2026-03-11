@@ -14,17 +14,20 @@ export function LoginPage() {
         setLoading(true);
         setError(null);
 
-        const { error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        });
+        try {
+            const { error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
 
-        if (error) {
-            setError(error.message);
+            if (error) {
+                setError(error.message);
+            } else {
+                // AuthContext will pick up the session change
+                navigate('/');
+            }
+        } finally {
             setLoading(false);
-        } else {
-            // AuthContext will pick up the session change
-            navigate('/');
         }
     };
 

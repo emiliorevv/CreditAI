@@ -100,7 +100,7 @@ export function RegisterPage() {
                     </div>
 
                     {error && (
-                        <div className="text-red-500 text-sm text-center">{error}</div>
+                        <div role="alert" aria-live="assertive" className="text-red-500 text-sm text-center">{error}</div>
                     )}
 
                     <div>
