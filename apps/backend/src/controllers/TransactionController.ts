@@ -40,6 +40,12 @@ export class TransactionController {
             res.status(201).json(transaction);
         } catch (error: any) {
             console.error('Error creating transaction:', error);
+            if (error.message === 'Card not found for transaction validation') {
+                return res.status(404).json({ error: 'Card not found' });
+            }
+            if (error.message.startsWith('Forbidden: Card does not belong to user')) {
+                return res.status(403).json({ error: 'Forbidden' });
+            }
             if (error.message.startsWith('Transaction declined')) {
                 return res.status(400).json({ error: error.message });
             }

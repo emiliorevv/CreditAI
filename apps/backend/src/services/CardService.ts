@@ -15,11 +15,12 @@ export class CardService {
     return (data as IUserCard[]).map(card => this.calculateCardStatus(card));
   }
 
-  static async getCardById(cardId: string): Promise<IUserCard | null> {
+  static async getCardById(userId: string, cardId: string): Promise<IUserCard | null> {
     const { data, error } = await supabase
       .from('user_cards')
       .select('*')
       .eq('id', cardId)
+      .eq('user_id', userId)
       .single();
 
     if (error) {

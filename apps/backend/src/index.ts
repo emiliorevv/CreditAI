@@ -11,7 +11,9 @@ import transactionRoutes from './routes/transaction.routes';
 const app = express();
 const port = process.env.PORT || 3000;
 
-const allowedOrigins = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['http://localhost:5173', 'http://localhost:3000'];
+const allowedOrigins = process.env.CORS_ORIGINS 
+    ? process.env.CORS_ORIGINS.split(',').map(o => o.trim()).filter(Boolean) 
+    : ['http://localhost:5173', 'http://localhost:3000'];
 const corsOptions = {
     origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
         if (!origin || allowedOrigins.includes(origin)) {

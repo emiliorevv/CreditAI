@@ -4,11 +4,9 @@ import { authMiddleware } from '../middleware/authMiddleware';
 
 const router = Router();
 
-router.use(authMiddleware);
-
-router.get('/', CardController.getCards);
-router.get('/models', CardController.getModels);
-router.post('/', CardController.createCard);
-router.get('/:cardId/transactions', CardController.getTransactions);
+router.get('/models', CardController.getModels); // Public endpoint
+router.post('/', authMiddleware, CardController.createCard);
+router.get('/:cardId/transactions', authMiddleware, CardController.getTransactions);
+router.get('/', authMiddleware, CardController.getCards);
 
 export default router;

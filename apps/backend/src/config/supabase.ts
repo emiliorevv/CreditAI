@@ -19,16 +19,22 @@ console.log('Service Role Key Present:', hasServiceKey);
 console.log('Anon Key Present:', hasAnonKey);
 console.log('-----------------------');
 
-if (!supabaseUrl || !supabaseAnonKey) {
-    console.warn('⚠️ Supabase URL or Anon Key is missing. Check .env file.');
+if (!supabaseUrl) {
+    throw new Error('Supabase URL is missing. Check SUPABASE_URL in your .env file.');
+}
+if (!supabaseAnonKey) {
+    throw new Error('Supabase Anon Key is missing. Check SUPABASE_ANON_KEY in your .env file.');
 }
 
 // Default client uses Anon key for RLS adherence.
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export function getServiceRoleClient() {
+    if (!supabaseUrl) {
+        throw new Error('Supabase URL is missing when trying to create Service Role Client. Check SUPABASE_URL in your .env file.');
+    }
     if (!supabaseServiceKey) {
-        throw new Error('Supabase Service Role Key is missing.');
+        throw new Error('Supabase Service Role Key is missing. Check SUPABASE_SERVICE_ROLE_KEY in your .env file.');
     }
     return createClient(supabaseUrl, supabaseServiceKey);
 }

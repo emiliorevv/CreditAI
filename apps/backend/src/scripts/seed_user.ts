@@ -1,19 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
-import path from 'path';
+import { getServiceRoleClient } from '../config/supabase';
 
-// Load env from parent directory
-dotenv.config({ path: path.resolve(__dirname, '../../../../.env') });
-
-const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY; // Ideally Service Role Key, but anon for now if policies allow insert
-
-if (!supabaseUrl || !supabaseKey) {
-    console.error('Missing Supabase URL or Key');
-    process.exit(1);
-}
-
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = getServiceRoleClient();
 
 async function seed() {
     console.log('🌱 Seeding Test User...');
@@ -62,4 +49,7 @@ async function seed() {
     }
 }
 
-seed();
+seed().catch(err => {
+    console.error('❌ Seed script failed:', err);
+    process.exit(1);
+});

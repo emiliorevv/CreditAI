@@ -34,6 +34,7 @@ export function RegisterPage() {
             // Typically Supabase requires email verification by default.
             // We can show a message to check email or if disabled, auto login.
             // For now, let's assume auto-login or redirect to login.
+            setLoading(false);
             toast.success('Registration successful! Please check your email for verification link if enabled, or sign in.', { duration: 5000 });
             navigate('/login');
         }

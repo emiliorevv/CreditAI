@@ -13,7 +13,8 @@ router.post('/chat', authMiddleware, async (req: AuthRequest, res) => {
     try {
         const { messages, text } = req.body;
         const userId = req.user?.id;
-        console.log('[AI Route] User ID:', userId);
+        const maskedId = userId ? `${userId.substring(0, 4)}...` : 'unknown';
+        console.log('[AI Route] User ID:', maskedId);
 
         if (!userId) {
             console.error('[AI Route] Unauthorized: No user ID');
@@ -75,7 +76,14 @@ router.post('/chat', authMiddleware, async (req: AuthRequest, res) => {
         }
     } catch (error: any) {
         console.error('AI Service Error:', error);
-        res.status(500).json({ error: error.message });
+        if (res.headersSent) {
+            if (!res.writableEnded) {
+                res.end();
+            }
+            return;
+        }
+
+        return res.status(500).json({ error: error.message });
     }
 });
 

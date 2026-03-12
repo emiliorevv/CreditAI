@@ -48,11 +48,13 @@ export function AiAssistant() {
         <>
             {/* Floating FAB */}
             <button
+                type="button"
+                aria-label="Open chat"
                 onClick={() => setIsOpen(true)}
                 className={`fixed bottom-6 right-6 p-4 rounded-full shadow-2xl transition-all duration-300 z-50 ${isOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100 bg-white hover:bg-neutral-100 hover:scale-110'
                     }`}
             >
-                <Sparkles className="w-6 h-6 text-indigo-600" />
+                <Sparkles aria-hidden="true" className="w-6 h-6 text-indigo-600" />
             </button>
 
             {/* Chat Window */}
@@ -66,10 +68,12 @@ export function AiAssistant() {
                                 <h3 className="font-bold text-white">Credit AI Agent</h3>
                             </div>
                             <button
+                                type="button"
+                                aria-label="Close chat"
                                 onClick={() => setIsOpen(false)}
                                 className="p-2 hover:bg-white/10 rounded-full transition-colors"
                             >
-                                <X className="w-5 h-5 text-neutral-400" />
+                                <X aria-hidden="true" className="w-5 h-5 text-neutral-400" />
                             </button>
                         </div>
 
@@ -121,6 +125,7 @@ export function AiAssistant() {
                         <form onSubmit={handleSubmit} className="p-4 border-t border-white/5 bg-neutral-900/50 backdrop-blur-md">
                             <div className="relative flex items-center">
                                 <input
+                                    aria-label="Message"
                                     value={input}
                                     onChange={handleInputChange}
                                     placeholder="Type a message..."
@@ -128,10 +133,11 @@ export function AiAssistant() {
                                 />
                                 <button
                                     type="submit"
+                                    aria-label="Send message"
                                     disabled={isLoading || !input.trim()}
                                     className="absolute right-2 p-2 bg-indigo-600 rounded-lg hover:bg-indigo-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    <Send className="w-4 h-4 text-white" />
+                                    <Send aria-hidden="true" className="w-4 h-4 text-white" />
                                 </button>
                             </div>
                         </form>

@@ -19,10 +19,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         let alive = true;
 
-        supabase.auth.getSession().then(({ data: { session } }) => {
+        supabase.auth.getSession().then(({ data: { session }, error }) => {
+            if (error) {
+                console.error('Failed to get session:', error);
+            }
             if (alive) {
                 setSession(session);
                 setUser(session?.user ?? null);
+                setLoading(false);
+            }
+        }).catch((err) => {
+            console.error('Unexpected error getting session:', err);
+            if (alive) {
+                setSession(null);
+                setUser(null);
                 setLoading(false);
             }
         });
