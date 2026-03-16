@@ -26,6 +26,8 @@ export function LoginPage() {
                 // AuthContext will pick up the session change
                 navigate('/');
             }
+        } catch (err: any) {
+            setError(err.message || String(err));
         } finally {
             setLoading(false);
         }

@@ -1,9 +1,10 @@
-import { supabase } from '../config/supabase';
+import { getServiceRoleClient } from '../config/supabase';
 import { IUserCard, ICardStatus, ICardModel } from '@credit-ai/shared';
 import { addMonths, setDate, isPast, format, differenceInDays } from 'date-fns';
 
 export class CardService {
   static async getUserCards(userId: string): Promise<ICardStatus[]> {
+    const supabase = getServiceRoleClient();
     const { data, error } = await supabase
       .from('user_cards')
       .select('*, card_model:card_models(*)')
@@ -16,6 +17,7 @@ export class CardService {
   }
 
   static async getCardById(userId: string, cardId: string): Promise<IUserCard | null> {
+    const supabase = getServiceRoleClient();
     const { data, error } = await supabase
       .from('user_cards')
       .select('*')
@@ -31,6 +33,7 @@ export class CardService {
   }
 
   static async getCardModels(): Promise<ICardModel[]> {
+    const supabase = getServiceRoleClient();
     const { data, error } = await supabase
       .from('card_models')
       .select('*');
@@ -40,6 +43,7 @@ export class CardService {
   }
 
   static async createCard(userId: string, cardData: Partial<IUserCard>): Promise<IUserCard> {
+    const supabase = getServiceRoleClient();
     const { data, error } = await supabase
       .from('user_cards')
       .insert({

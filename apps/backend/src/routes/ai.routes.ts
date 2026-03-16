@@ -36,8 +36,12 @@ router.post('/chat', authMiddleware, async (req: AuthRequest, res) => {
                     .join('');
             }
         }
+        const finalMessage = (lastMessageContent || '').trim();
+        if (!finalMessage) {
+            return res.status(400).json({ error: 'Missing message text' });
+        }
 
-        const result = await AiService.generateResponse(lastMessageContent || '', userId);
+        const result = await AiService.generateResponse(finalMessage, userId);
 
         // Result is a StreamTextResult
         // Manually pipe the data stream using Server-Sent Events (SSE) format

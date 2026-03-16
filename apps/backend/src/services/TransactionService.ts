@@ -1,9 +1,10 @@
-import { supabase } from '../config/supabase';
+import { getServiceRoleClient } from '../config/supabase';
 import { ITransaction } from '@credit-ai/shared';
 
 export class TransactionService {
     static async getTransactions(userId: string, cardId: string): Promise<ITransaction[]> {
         // 1. Verify card ownership
+        const supabase = getServiceRoleClient();
         const { data: card, error: cardError } = await supabase
             .from('user_cards')
             .select('user_id')
@@ -34,6 +35,7 @@ export class TransactionService {
 
     static async createTransaction(userId: string, transactionData: Partial<ITransaction>): Promise<ITransaction> {
         // 1. Fetch current card details
+        const supabase = getServiceRoleClient();
         const { data: card, error: cardError } = await supabase
             .from('user_cards')
             .select('user_id, current_balance, credit_limit')

@@ -50,8 +50,10 @@ export function AiAssistant() {
             <button
                 type="button"
                 aria-label="Open chat"
+                aria-hidden={isOpen}
+                tabIndex={isOpen ? -1 : 0}
                 onClick={() => setIsOpen(true)}
-                className={`fixed bottom-6 right-6 p-4 rounded-full shadow-2xl transition-all duration-300 z-50 ${isOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100 bg-white hover:bg-neutral-100 hover:scale-110'
+                className={`fixed bottom-6 right-6 p-4 rounded-full shadow-2xl transition-all duration-300 z-50 ${isOpen ? 'scale-0 opacity-0 pointer-events-none' : 'scale-100 opacity-100 bg-white hover:bg-neutral-100 hover:scale-110'
                     }`}
             >
                 <Sparkles aria-hidden="true" className="w-6 h-6 text-indigo-600" />
@@ -60,7 +62,7 @@ export function AiAssistant() {
             {/* Chat Window */}
             {
                 isOpen && (
-                    <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-neutral-900 border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden z-50 animate-in fade-in slide-in-from-bottom-10">
+                    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-[calc(100vw-32px)] sm:w-96 max-h-[80vh] sm:h-[600px] bg-neutral-900 border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden z-50 animate-in fade-in slide-in-from-bottom-10">
                         {/* Header */}
                         <div className="p-4 bg-gradient-to-r from-indigo-500/20 to-purple-600/20 border-b border-white/5 flex justify-between items-center backdrop-blur-md">
                             <div className="flex items-center gap-2">

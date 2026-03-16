@@ -1,7 +1,6 @@
 import { openai } from '@ai-sdk/openai';
 import { streamText } from 'ai';
 import { CardService } from './CardService';
-import { supabase } from '../config/supabase';
 
 export class AiService {
    static async generateResponse(userMessage: string, userId: string): Promise<any> {

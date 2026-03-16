@@ -5,20 +5,18 @@ const supabase = getServiceRoleClient();
 async function seed() {
     console.log('🌱 Seeding Test User...');
 
-    // 1. Create user in auth.users (This often requires Service Role Key or Admin API)
-    // Since we might be restricted with anon key, let's try to just use a UUID that MIGHT exist or create a new one via SignUp
-
+    // 1. Create user in auth.users via Admin API (prevents the service-role client from establishing a local RLS session)
     const email = `test-${Date.now()}@credit.ai`;
     const password = 'password123';
 
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email,
         password,
+        email_confirm: true,
     });
 
     if (authError) {
-        console.error('Error creating auth user:', authError.message);
-        // If user already exists, maybe try login? Or just continue if we know the ID.
+        console.error('Error creating auth user via admin API:', authError.message);
     }
 
     const userId = authData.user?.id;

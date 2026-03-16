@@ -34,9 +34,6 @@ export class TransactionController {
             if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
             const transaction = await TransactionService.createTransaction(userId, req.body);
-            if (transaction && transaction.id) {
-                res.location(`/api/transactions/${transaction.id}`);
-            }
             res.status(201).json(transaction);
         } catch (error: any) {
             console.error('Error creating transaction:', error);
