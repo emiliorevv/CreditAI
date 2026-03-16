@@ -1,13 +1,40 @@
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 
-dotenv.config();
+import path from 'path';
 
-const supabaseUrl = process.env.SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_ANON_KEY || ''; // Use Service Role Key if strict backend admin access is needed
+dotenv.config({ path: path.resolve(__dirname, '../../../../.env') });
 
-if (!supabaseUrl || !supabaseKey) {
-    console.warn('⚠️ Supabase URL or Key is missing. Check .env file.');
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+const hasUrl = !!supabaseUrl;
+const hasServiceKey = !!supabaseServiceKey;
+const hasAnonKey = !!supabaseAnonKey;
+
+console.log('--- Supabase Config ---');
+console.log('URL Present:', hasUrl);
+console.log('Service Role Key Present:', hasServiceKey);
+console.log('Anon Key Present:', hasAnonKey);
+console.log('-----------------------');
+
+if (!supabaseUrl) {
+    throw new Error('Supabase URL is missing. Check SUPABASE_URL in your .env file.');
+}
+if (!supabaseAnonKey) {
+    throw new Error('Supabase Anon Key is missing. Check SUPABASE_ANON_KEY in your .env file.');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+// Default client uses Anon key for RLS adherence.
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+export function getServiceRoleClient() {
+    if (!supabaseUrl) {
+        throw new Error('Supabase URL is missing when trying to create Service Role Client. Check SUPABASE_URL in your .env file.');
+    }
+    if (!supabaseServiceKey) {
+        throw new Error('Supabase Service Role Key is missing. Check SUPABASE_SERVICE_ROLE_KEY in your .env file.');
+    }
+    return createClient(supabaseUrl, supabaseServiceKey);
+}

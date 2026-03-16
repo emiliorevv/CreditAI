@@ -1,9 +1,10 @@
-import { supabase } from '../config/supabase';
+import { getServiceRoleClient } from '../config/supabase';
 import { IUserCard, ICardStatus, ICardModel } from '@credit-ai/shared';
 import { addMonths, setDate, isPast, format, differenceInDays } from 'date-fns';
 
 export class CardService {
   static async getUserCards(userId: string): Promise<ICardStatus[]> {
+    const supabase = getServiceRoleClient();
     const { data, error } = await supabase
       .from('user_cards')
       .select('*, card_model:card_models(*)')
@@ -15,7 +16,24 @@ export class CardService {
     return (data as IUserCard[]).map(card => this.calculateCardStatus(card));
   }
 
+  static async getCardById(userId: string, cardId: string): Promise<IUserCard | null> {
+    const supabase = getServiceRoleClient();
+    const { data, error } = await supabase
+      .from('user_cards')
+      .select('*')
+      .eq('id', cardId)
+      .eq('user_id', userId)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') return null; // No rows found
+      throw new Error(error.message);
+    }
+    return data as IUserCard;
+  }
+
   static async getCardModels(): Promise<ICardModel[]> {
+    const supabase = getServiceRoleClient();
     const { data, error } = await supabase
       .from('card_models')
       .select('*');
@@ -25,6 +43,7 @@ export class CardService {
   }
 
   static async createCard(userId: string, cardData: Partial<IUserCard>): Promise<IUserCard> {
+    const supabase = getServiceRoleClient();
     const { data, error } = await supabase
       .from('user_cards')
       .insert({

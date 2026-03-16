@@ -12,6 +12,7 @@
     "dependencies": {
         "@ai-sdk/react": "^3.0.91",
         "@credit-ai/shared": "*",
+        "@supabase/supabase-js": "^2.99.1",
         "@tanstack/react-query": "^5.90.21",
         "ai": "^6.0.89",
         "clsx": "^2.1.1",
@@ -19,6 +20,8 @@
         "lucide-react": "^0.564.0",
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
+        "react-hot-toast": "^2.6.0",
+        "react-router-dom": "^7.13.0",
         "tailwind-merge": "^3.4.0"
     },
     "devDependencies": {
